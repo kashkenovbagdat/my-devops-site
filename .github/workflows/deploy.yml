@@ -9,17 +9,26 @@ on:
 permissions:
   contents: read
 
+<<<<<<< HEAD
 concurrency:
   group: production-deploy
   cancel-in-progress: true
 
 jobs:
   # Старый сайт на Runner
+=======
+jobs:
+  # 1. Обновление старого сайта
+>>>>>>> 7104867 (Add Docker CI/CD deployment)
   deploy-old:
     runs-on: [self-hosted, linux, x64]
 
     steps:
+<<<<<<< HEAD
       - name: Get source code
+=======
+      - name: Checkout
+>>>>>>> 7104867 (Add Docker CI/CD deployment)
         uses: actions/checkout@v4
 
       - name: Deploy old website
@@ -28,16 +37,28 @@ jobs:
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='README.md' \
+<<<<<<< HEAD
+=======
+            --exclude='Dockerfile' \
+>>>>>>> 7104867 (Add Docker CI/CD deployment)
             ./ /var/www/my-devops/
 
           test -s /var/www/my-devops/index.html
 
+<<<<<<< HEAD
   # Сборка Docker Image
+=======
+  # 2. Сборка и отправка Docker Image
+>>>>>>> 7104867 (Add Docker CI/CD deployment)
   build:
     runs-on: ubuntu-latest
 
     steps:
+<<<<<<< HEAD
       - name: Get source code
+=======
+      - name: Checkout
+>>>>>>> 7104867 (Add Docker CI/CD deployment)
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
@@ -46,20 +67,32 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+<<<<<<< HEAD
       - name: Build and push image
+=======
+      - name: Build and Push
+>>>>>>> 7104867 (Add Docker CI/CD deployment)
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: bagdatk/my-devops-site:latest
 
+<<<<<<< HEAD
   # Обновление контейнера на Docker-сервере
+=======
+  # 3. Обновление Docker-сервера
+>>>>>>> 7104867 (Add Docker CI/CD deployment)
   deploy-docker:
     needs: build
     runs-on: [self-hosted, linux, x64]
 
     steps:
+<<<<<<< HEAD
       - name: Configure SSH
+=======
+      - name: Setup SSH
+>>>>>>> 7104867 (Add Docker CI/CD deployment)
         env:
           SSH_KEY: ${{ secrets.DOCKER_SSH_KEY }}
         run: |
@@ -69,6 +102,7 @@ jobs:
           chmod 600 ~/.ssh/docker_deploy
           ssh-keyscan -H 192.168.168.109 >> ~/.ssh/known_hosts
 
+<<<<<<< HEAD
       - name: Deploy Docker container
         run: |
           ssh -i ~/.ssh/docker_deploy \
@@ -82,5 +116,21 @@ jobs:
                bagdatk/my-devops-site:latest'
 
       - name: Cleanup SSH key
+=======
+      - name: Deploy container
+        run: |
+          ssh -i ~/.ssh/docker_deploy user@192.168.168.109 \
+            'docker pull bagdatk/my-devops-site:latest &&
+             docker rm -f my-devops-site || true'
+
+          ssh -i ~/.ssh/docker_deploy user@192.168.168.109 \
+            'docker run -d \
+             --restart unless-stopped \
+             --name my-devops-site \
+             -p 8080:80 \
+             bagdatk/my-devops-site:latest'
+
+      - name: Cleanup
+>>>>>>> 7104867 (Add Docker CI/CD deployment)
         if: always()
         run: rm -f ~/.ssh/docker_deploy
